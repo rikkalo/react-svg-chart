@@ -6,7 +6,7 @@ class App extends Component {
   render () {
     const points = [
       {value: 0, date: 1420056000, delta:0.51},
-      {value: 83, date: 1421424000, delta:0.45},
+      {value: 86, date: 1421424000, delta:0.45},
       {value: 28, date: 1421624000, delta:0.78},
       {value: 30, date: 1421984000, delta:0.21},
       {value: 56, date: 1422984000, delta:0.65},
