@@ -1,0 +1,14 @@
+svg {
+  width:860;
+  height:280;
+  font-size: 11px;
+  font-family: Arial;
+}
+
+.tooltip {
+  width: 50px;
+  background-color: yellow;
+  position: relative;
+  display: block;
+  margin-top: 50px;
+}

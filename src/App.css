@@ -18,6 +18,15 @@
   font-size: large;
 }
 
+.tooltip {
+  width: 50px;
+  background-color: yellow;
+  position: relative;
+  display: block;
+  margin-top: 50px;
+}
+
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
