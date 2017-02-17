@@ -5,8 +5,6 @@ class Chart extends Component {
    super(props);
    this.state = {
      tooltipTrigger: null,
-     currentPoint: {},
-     currentYears: '',
      labelBottomOffset: 55,
      labelLeftOffset: 35,
      RightOffset: 20
@@ -16,12 +14,11 @@ class Chart extends Component {
   graphComponent(points, start, end, maxValue) {
     let path ='';
     let dateRange = end - start;
-    let width = 860 - this.state.labelLeftOffset - this.state.RightOffset;
+    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
     let height = 280 - this.state.labelBottomOffset;
     let max = (maxValue + maxValue*0.1);
     points.map((point, index) => {
-      let x = Math.round((point['date']-start) * width / dateRange);
-      console.log(x)
+      let x = this.state.labelLeftOffset + ((point['date']-start) * width / dateRange);
       let y = height - Math.round(point['value'] * height / max);
       path+=((index ? 'L' : 'M') + x + ',' + y);
     });
@@ -48,7 +45,7 @@ class Chart extends Component {
 
     for (let i = 0; i < months; i++) {
       labels.push(
-        <tspan x={this.state.labelLeftOffset + spaceXpx * i + spaceXpx / 2} y="245">{month[startDate.getMonth()]}</tspan>
+        <tspan key={'tspan' + i} x={this.state.labelLeftOffset + spaceXpx * i + spaceXpx / 2} y="245">{month[startDate.getMonth()]}</tspan>
       );
       startDate.setMonth(startDate.getMonth() + 1);
     }
@@ -69,10 +66,10 @@ class Chart extends Component {
     for (let i = 0; i < 5; i++) {
       let y = Math.round(start-spaceYpx*i);
       lines.push(
-        <line fill="none" stroke="#e6e7e9" x1="35" y1={y} x2="840" y2={y} strokeWidth="1" opacity="1" />
+        <line key={'line' + i} fill="none" stroke="#e6e7e9" x1="35" y1={y} x2="840" y2={y} strokeWidth="1" opacity="1" />
       );
       labels.push(
-        <tspan key={i} x="18" y={y} >{spaceY*i}</tspan>
+        <tspan key={'label' + i} x="18" y={y} >{spaceY*i}</tspan>
       );
     }
     return (
@@ -85,11 +82,10 @@ class Chart extends Component {
     );
   }
 
-  handleHover(trigger) {
-    console.log(trigger);
-    console.log('sdfsdf')
+  handleHover(point, x, y) {
+    console.log(point, x, y);
     this.setState({
-      tooltipTrigger: trigger,
+      tooltipTrigger: { point, x, y },
     })
   }
 
@@ -115,27 +111,79 @@ class Chart extends Component {
     }
   }
 
+  tooltip(point) {
+    let hRect = 50;
+    let wRect = 120;
+    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
+    let x = point.x - (point.x > width - wRect ? wRect : 0) + 5;
+    let y = point.y + (point.y > hRect + 10 ? -(hRect + 10) : 10);
+    let d = new Date(point.point.date * 1000);
+    let month = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+    return (
+      <g>
+        <defs>
+          <filter id="f3">
+            <feOffset result="offOut" in="SourceAlpha" dx="0" dy="2" />
+            <feGaussianBlur result="blurOut" in="offOut" stdDeviation="2" />
+            <feComponentTransfer>
+              <feFuncA type="linear" slope="0.3" in="blurOut" result="opacity"/>
+            </feComponentTransfer>
+            <feBlend in="SourceGraphic" in2="opacity" mode="normal" />
+          </filter>
+        </defs>
+        <rect
+          x={x} y={y}
+          width={wRect} height={hRect}
+          rx="5" ry="5" fill="#fff"
+          strokeWidth="3" filter="url(#f3)"
+        />
+        <text x={x+12} y={y+20} textAnchor="start" stroke="none" fill="#9d9ea2" fontSize="12">{d.getDate()} {month[d.getMonth()]} {d.getFullYear()}</text>
+        <text x={x+15} y={y+38} textAnchor="start" stroke="none" fill="#434c5b" fontSize="12">$ {point.point.value.toFixed(2).replace('.', ',')}</text>
+        <text x={x+68} y={y+38} textAnchor="start" stroke="none" fill="#1e9d50" fontSize="12">{point.point.delta >= 0 ? '▼' : '▲'} {0.52 || Math.abs(point.point.delta)}</text>
+      </g>
+    );
+  }
+
   render() {
+    let max = (this.props.maxValue + this.props.maxValue*0.1);
+    let dateRange = this.props.endDate - this.props.startDate;
+    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
+    let height = 280 - this.state.labelBottomOffset;
+
     return (
       <div className="chart">
       <svg width="860" height="280">
+        <rect x="0" y="0" width="860" height="280" fill="#f6f7f9" />
         {this.axisY(this.props.maxValue)}
         {this.axisX(this.props.startDate, this.props.endDate)}
         {this.numberYears(this.props.startDate, this.props.endDate)}
 
         {this.graphComponent(this.props.points, this.props.startDate, this.props.endDate, this.props.maxValue)}
 
+        {this.state.tooltipTrigger ? <circle cx={this.state.tooltipTrigger.x} cy={this.state.tooltipTrigger.y} r="4" fill="#78a1c1" stroke="#f6f7f9" strokeWidth="2" opacity="1"></circle> : null}
+        {this.state.tooltipTrigger ? <line fill="none" stroke="#d7d7d7" x1={this.state.tooltipTrigger.x} y1={this.state.tooltipTrigger.y} x2={this.state.tooltipTrigger.x} y2={height} strokeDasharray="4,4" strokeWidth="1" opacity="1" /> : null}
+
+        {this.state.tooltipTrigger ? this.tooltip(this.state.tooltipTrigger) : null}
+
         { this.props.points.map((point, i)=>{
-          return <rect onMouseOver={this.handleHover.bind(this,point)}
+          let prevPoint = this.props.points[i ? i-1 : i];
+          let nextPoint = this.props.points[i < this.props.points.length-1 ? i+1 : i];
+
+          let xp = this.state.labelLeftOffset + ((prevPoint['date']-this.props.startDate) * width / dateRange);
+          let xc = this.state.labelLeftOffset + ((point['date']-this.props.startDate) * width / dateRange);
+          let xn = this.state.labelLeftOffset + ((nextPoint['date']-this.props.startDate) * width / dateRange);
+
+          let yc = height - Math.round(point['value'] * height / max);
+
+          let x1 = xp == xc ? xc : xc - (xc - xp)/2;
+          let x2 = xn == xc ? xc : xc + (xn - xc)/2;
+
+          return <rect onMouseOver={this.handleHover.bind(this,point,xc,yc)}
           onMouseLeave={this.handleLeave.bind(this)}
-          key={i} x={point['date']} y={point['value']} width="10" height="100" fill="rgb(0,0,255)" stroke="red" strokeWidth="3" opacity="0.1"/>
+          key={i} x={x1} y={0} width={x2-x1} height={height}  strokeWidth="3" opacity="0"/>
         })
         }
-
-        {this.state.tooltipTrigger ? <circle cx={this.state.tooltipTrigger.date} cy={this.state.tooltipTrigger.value} r="4" fill="#78a1c1" stroke="#f6f7f9" strokeWidth="2" opacity="1"></circle> : null}
-        {this.state.tooltipTrigger ? <line fill="none" stroke="#d7d7d7" x1={this.state.tooltipTrigger.date} y1={this.state.tooltipTrigger.value} x2="453" y2="225" strokeDasharray="4,4" strokeWidth="1" opacity="1" /> : null}
       </svg>
-      {this.state.tooltipTrigger ? <div className='tooltip'>value:{this.state.tooltipTrigger.value}, date:{this.state.tooltipTrigger.date}</div> : null}
       </div>
     );
   }
