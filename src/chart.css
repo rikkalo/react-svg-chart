@@ -5,10 +5,3 @@ svg {
   font-family: Arial;
   background-color:#f6f7f9;
 }
-
-.tooltip {
-  width: 50px;
-  position: relative;
-  display: block;
-  margin-top: 50px;
-}
