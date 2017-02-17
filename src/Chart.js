@@ -7,14 +7,14 @@ class Chart extends Component {
      tooltipTrigger: null,
      labelBottomOffset: 55,
      labelLeftOffset: 35,
-     RightOffset: 20
+     rightOffset: 20
    }
  }
 
   graphComponent(points, start, end, maxValue) {
     let path ='';
     let dateRange = end - start;
-    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
+    let width = 860 - this.state.rightOffset - this.state.labelLeftOffset;
     let height = 280 - this.state.labelBottomOffset;
     let max = (maxValue + maxValue*0.1);
     points.map((point, index) => {
@@ -40,7 +40,7 @@ class Chart extends Component {
     let endMonth = endDate.getMonth();
     let months = !years ? endMonth - startMonth + 1 : endMonth + (years * 12) - startMonth;
 
-    let width = 860 - this.state.labelLeftOffset - this.state.RightOffset;
+    let width = 860 - this.state.labelLeftOffset - this.state.rightOffset;
     let spaceXpx = width / months;
 
     for (let i = 0; i < months; i++) {
@@ -83,7 +83,6 @@ class Chart extends Component {
   }
 
   handleHover(point, x, y) {
-    console.log(point, x, y);
     this.setState({
       tooltipTrigger: { point, x, y },
     })
@@ -114,9 +113,9 @@ class Chart extends Component {
   tooltip(point) {
     let hRect = 50;
     let wRect = 120;
-    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
+    let width = 860 - this.state.rightOffset - this.state.labelLeftOffset;
     let x = point.x - (point.x > width - wRect ? wRect : 0) + 5;
-    let y = point.y + (point.y > hRect + 10 ? -(hRect + 10) : 10);
+    let y = point.y + (point.y > hRect + 10 ? - (hRect + 10) : 10);
     let d = new Date(point.point.date * 1000);
     let month = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
     return (
@@ -145,9 +144,9 @@ class Chart extends Component {
   }
 
   render() {
-    let max = (this.props.maxValue + this.props.maxValue*0.1);
+    let max = (this.props.maxValue + this.props.maxValue * 0.1);
     let dateRange = this.props.endDate - this.props.startDate;
-    let width = 860 - this.state.RightOffset - this.state.labelLeftOffset;
+    let width = 860 - this.state.rightOffset - this.state.labelLeftOffset;
     let height = 280 - this.state.labelBottomOffset;
 
     return (
